@@ -1,0 +1,30 @@
+require 'net/http'
+require 'digest/sha1'
+
+class Dig
+  attr_reader :tag
+  POST = URI.parse("http://git-coin.turingapps.io/hash")
+  def initialize(tag)
+    @tag = tag
+    puts "miner got to init"
+    run
+  end
+
+  def run
+    puts "miner got to run"
+    sha = (1..30000).to_a.sample.to_s + "Grace Hopper's Ghost"
+    target = Net::HTTP.get(URI.parse("http://git-coin.turingapps.io/target")).hex
+    loop do
+      100000000.times do |i|
+        puts "#{tag} at iteration #{i}" if i % 1_000_000 == 0
+        sha = Digest::SHA1.hexdigest(sha)
+        if sha.hex < target
+          Net::HTTP.post_form(POST, { "message" => sha.to_i, "owner" => "Hopper Posse 4 Lyfe" })
+          target = Net::HTTP.get(URI.parse("http://git-coin.turingapps.io/target"))
+          puts "#{sha} is next"
+          puts
+        end
+      end
+    end
+  end
+end
